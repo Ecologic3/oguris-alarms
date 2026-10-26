@@ -1,0 +1,20 @@
+# Build artifacts and binaries
+*.apk
+*.apk.idsig
+/build/
+
+# Signing material, never committed
+*.keystore
+
+# Local-only notes (contain credentials)
+*.local.md
+
+# Local research and prototyping, not part of the app repo
+/direct/
+
+# Design scratch and renders
+/assets/
+/renders/
+/icon-preview-1.2.png
+
+__pycache__/
