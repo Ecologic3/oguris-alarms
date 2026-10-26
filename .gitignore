@@ -1,24 +1,20 @@
-# Build artifacts and binaries
-*.apk
-*.apk.idsig
-/build/classes/
-/build/dex/
-/build/gen/
-/build/res.zip
-/build/verify-classes/
-
-# Signing material, never committed
+# Signing material and built artefacts: never commit.
 *.keystore
+*.apk
+*.idsig
+build/classes/
+build/dex/
+build/gen/
+build/res.zip
+build/unsigned.apk
+build/aligned.apk
+build/icon-check/
+renders/
+icon-preview*.png
 
-# Local-only notes (contain credentials)
+# Local-only material for this project: never commit.
 *.local.md
-
-# Local research and prototyping, not part of the app repo
 /direct/
-
-# Design scratch and renders
 /assets/
-/renders/
-/icon-preview-1.2.png
-
+build/verify-classes/
 __pycache__/

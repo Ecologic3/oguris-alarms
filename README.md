@@ -8,10 +8,6 @@ sessions, time sync, alarm upload, battery level), ported from
 Gadgetbridge's open-source implementation and verified against the real
 device. No companion app is needed.
 
-- Package: `app.oguri.alarms`
-- Version: 1.7 (versionCode 8), minSdk 29, targetSdk 34
-- Pure Java, Android framework only (no AndroidX, no Kotlin, no Gradle)
-
 ## Features
 
 - Up to five alarms, each with a name, a time and repeat days. Alarms are
@@ -27,10 +23,17 @@ device. No companion app is needed.
 - Backup triggers and ring timing are real system alarm clocks
   (`setAlarmClock`), re-armed after every firing and after a reboot.
 
+## Requirements
+
+- Android 10 or newer and a Honor Band 4
+- Bluetooth (Nearby devices) and exact-alarm permissions; the app's
+  Setup section walks through granting them
+
 ## Building
 
-No Gradle: plain Java on the Android framework, built with aapt2, javac,
-d8, zipalign and apksigner from the Android SDK build-tools and a JDK 17.
+No Gradle: the app is plain Java on the Android framework, built with
+aapt2, javac, d8, zipalign and apksigner from the Android SDK
+build-tools and a JDK 17.
 
 ```sh
 export JAVA_HOME=<jdk17>
@@ -54,8 +57,5 @@ Notes: sources use anonymous inner classes only (no lambdas; they break
 the d8 step in this pipeline), and `classes.dex` must sit at the APK
 archive root, hence the zip from inside `build/dex`.
 
-## Signing
-
-Release builds are signed with the project's own keystore. The keystore
-and its password are kept locally and are not part of this repository,
-so updates can always be installed in place.
+The signing keystore is not in this repository. Package:
+`app.oguri.alarms`, minSdk 29, targetSdk 34.
