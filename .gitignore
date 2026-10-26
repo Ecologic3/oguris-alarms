@@ -1,7 +1,11 @@
 # Build artifacts and binaries
 *.apk
 *.apk.idsig
-/build/
+/build/classes/
+/build/dex/
+/build/gen/
+/build/res.zip
+/build/verify-classes/
 
 # Signing material, never committed
 *.keystore
