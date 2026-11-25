@@ -371,69 +371,6 @@ public final class AlarmStore {
         return "System default";
     }
 
-    // ------------------------------------------------------------ export
-
-    /**
-     * Serializes every alarm definition and setting to a JSON document
-     * for the Oguri Hub migration (the hub app imports this exact schema;
-     * see the export schema in the hub checklist). Transient backup
-     * window/ringing state is deliberately not exported: it describes a
-     * live window, not a definition, and must never be recreated.
-     */
-    public static String buildExportJson(Context ctx) throws org.json.JSONException {
-        SharedPreferences sp = prefs(ctx);
-        org.json.JSONObject root = new org.json.JSONObject();
-        root.put("format", "oguris-alarms-export");
-        root.put("formatVersion", 1);
-        root.put("app", "app.oguri.alarms");
-        root.put("appVersionName", "1.8");
-        root.put("appVersionCode", 9);
-        long nowMillis = System.currentTimeMillis();
-        root.put("exportedAtMillis", nowMillis);
-        root.put("exportedAt", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
-                .format(new Date(nowMillis)));
-
-        List<String> ids = getIds(ctx);
-        org.json.JSONArray idArray = new org.json.JSONArray();
-        org.json.JSONArray alarms = new org.json.JSONArray();
-        for (String id : ids) {
-            idArray.put(id);
-            org.json.JSONObject alarm = new org.json.JSONObject();
-            alarm.put("id", id);
-            String customName = sp.getString("name_" + id, null);
-            alarm.put("customName",
-                    customName == null ? org.json.JSONObject.NULL : customName);
-            alarm.put("name", getName(ctx, id));
-            alarm.put("isDynamic", isDynamic(id));
-            alarm.put("enabled", isEnabled(ctx, id));
-            alarm.put("hour", getHour(ctx, id));
-            alarm.put("minute", getMinute(ctx, id));
-            alarm.put("daysMask", getDaysMask(ctx, id));
-            alarm.put("effectiveDaysMask", effectiveDaysMask(ctx, id));
-            alarms.put(alarm);
-        }
-        root.put("alarmIds", idArray);
-        root.put("alarms", alarms);
-        root.put("nextUserSeq", sp.getInt(KEY_NEXT_USER_SEQ, 1));
-
-        org.json.JSONObject settings = new org.json.JSONObject();
-        String soundUri = sp.getString("backup_sound_uri", null);
-        settings.put("backupSoundUri",
-                soundUri == null ? org.json.JSONObject.NULL : soundUri);
-        root.put("settings", settings);
-
-        org.json.JSONObject state = new org.json.JSONObject();
-        String outcome = sp.getString(KEY_LAST_BACKUP_OUTCOME, null);
-        state.put("lastBackupOutcome",
-                outcome == null ? org.json.JSONObject.NULL : outcome);
-        state.put("bandBatteryLevel", getBandBatteryLevel(ctx));
-        state.put("bandBatteryReadAtMillis", getBandBatteryReadAt(ctx));
-        root.put("state", state);
-
-        root.put("directBand", DirectBandState.exportJson(ctx));
-        return root.toString(2);
-    }
-
     /** Bitmask with every weekday (Sunday..Saturday) set. */
     public static int allDaysMask() {
         int mask = 0;

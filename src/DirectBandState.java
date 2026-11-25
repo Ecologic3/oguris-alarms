@@ -64,29 +64,6 @@ public final class DirectBandState {
         return mac;
     }
 
-    /**
-     * Read-only export of the stored state for the hub migration export:
-     * the stored secret key hex and fake MAC (either may be null when it
-     * was never generated) and the IV counter. Unlike secretKey() and
-     * fakeMac(), this never generates or stores anything.
-     */
-    public static synchronized org.json.JSONObject exportJson(Context ctx) {
-        SharedPreferences prefs = prefs(ctx);
-        org.json.JSONObject out = new org.json.JSONObject();
-        try {
-            String secret = prefs.getString(KEY_SECRET, null);
-            String mac = prefs.getString(KEY_FAKE_MAC, null);
-            out.put("secretKeyHex",
-                    secret == null ? org.json.JSONObject.NULL : secret);
-            out.put("fakeMac",
-                    mac == null ? org.json.JSONObject.NULL : mac);
-            out.put("ivCounter", prefs.getLong(KEY_IV_COUNTER, 0L));
-        } catch (org.json.JSONException ignored) {
-            // Export fields are best-effort; a failure leaves an empty object.
-        }
-        return out;
-    }
-
     public static synchronized long ivCounter(Context ctx) {
         return prefs(ctx).getLong(KEY_IV_COUNTER, 0L);
     }
