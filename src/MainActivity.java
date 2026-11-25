@@ -40,6 +40,8 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import java.io.OutputStream;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -68,6 +70,7 @@ public class MainActivity extends Activity {
     private static final String[] DAY_LABELS = {"Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"};
 
     private static final int REQUEST_PICK_BACKUP_SOUND = 2001;
+    private static final int REQUEST_EXPORT_DATA = 2002;
     private static final long TEST_SOUND_MS = 3000L;
 
     private final List<CardViews> mCards = new ArrayList<CardViews>();
@@ -150,6 +153,12 @@ public class MainActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_EXPORT_DATA) {
+            if (resultCode == RESULT_OK && data != null && data.getData() != null) {
+                writeExportFile(data.getData());
+            }
+            return;
+        }
         if (requestCode != REQUEST_PICK_BACKUP_SOUND || resultCode != RESULT_OK) {
             return;
         }
@@ -556,7 +565,59 @@ public class MainActivity extends Activity {
         });
         card.addView(testButton);
 
+        Button exportButton = makeButton("Export data (for Oguri Hub)");
+        LinearLayout.LayoutParams exportParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        exportParams.topMargin = dp(12);
+        exportButton.setLayoutParams(exportParams);
+        exportButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startExport();
+            }
+        });
+        card.addView(exportButton);
+
         return card;
+    }
+
+    /** Opens the system document picker so the user chooses the export file. */
+    private void startExport() {
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("application/json");
+        intent.putExtra(Intent.EXTRA_TITLE, "oguris-alarms-export.json");
+        try {
+            startActivityForResult(intent, REQUEST_EXPORT_DATA);
+        } catch (Exception e) {
+            Toast.makeText(this, "No file picker available", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    /** Writes the full AlarmStore export JSON to the user-picked document. */
+    private void writeExportFile(Uri uri) {
+        OutputStream out = null;
+        try {
+            String json = AlarmStore.buildExportJson(this);
+            out = getContentResolver().openOutputStream(uri);
+            if (out == null) {
+                throw new java.io.IOException("Could not open the chosen file");
+            }
+            out.write(json.getBytes("UTF-8"));
+            out.flush();
+            Toast.makeText(this, "Export written", Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            Toast.makeText(this, "Export failed: " + e.getMessage(),
+                    Toast.LENGTH_LONG).show();
+        } finally {
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (Exception ignored) {
+                    // Nothing useful to do if closing the export stream fails.
+                }
+            }
+        }
     }
 
     private Button makeButton(String text) {
